@@ -75,17 +75,19 @@ export const updateTodo = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        success: true,
+        success: false,
         message: "Todo not found",
       });
     }
     user.title = title;
-    user.save();
-    return res.status(200).json({
-      success: true,
-      message: "Todo Updated",
-      data: user,
-    });
+    await user.save();
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Todo Updated",
+        data: user,
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
