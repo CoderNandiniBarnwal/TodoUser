@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv/config";
 import { verifyMail } from "../emailVerify/verifyMail.js";
+import sessionSchema from "../model/sessionSchema.js";
 
 export const register = async (req, res) => {
   try {
@@ -62,10 +63,16 @@ export const login = async (req, res) => {
     }
 
     if (passwordCheck && user.isVerified === true) {
-      const accessToken = jwt.sign({ id: user.id }, process.env.SECRETKEY, {
+
+      await sessionSchema.findOneAndDelete({userId: user._id})
+
+      await sessionSchema.create({userId: user._id})
+
+
+      const accessToken = jwt.sign({ id: user._id }, process.env.SECRETKEY, {
         expiresIn: "10days",
       });
-      const refreshToken = jwt.sign({ id: user.id }, process.env.SECRETKEY, {
+      const refreshToken = jwt.sign({ id: user._id }, process.env.SECRETKEY, {
         expiresIn: "30days",
       });
 
@@ -92,3 +99,32 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) => {
+
+    try {
+        const existing = await sessionSchema.findOne({ userId: req.userId });
+        const user = await userSchema.findById({ _id: req.userId });    
+        if (existing) {
+            await sessionSchema.findOneAndDelete({ userId: req.userId });
+            user.isLogin = false;
+            await user.save()
+            return res.status(200).json({
+                success: true,
+                message: "Session successfully ended",
+            });
+        } else {
+            return res.status(404).json({
+                success: false,
+                message: "User had no session",
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
