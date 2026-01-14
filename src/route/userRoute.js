@@ -5,7 +5,7 @@ import {
   userValidateSchema,
   validateUser,
 } from "../validators/userValidate.js";
-import {hasToken} from "../middleware/hasToken.js";
+import { hasToken } from "../middleware/hasToken.js";
 
 const userRoute = express.Router();
 userRoute.post("/register", validateUser(userValidateSchema), register);

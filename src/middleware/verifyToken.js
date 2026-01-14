@@ -104,3 +104,6 @@ export const verifyToken = async (req, res) => {
     });
   }
 };
+
+// page limit 
+// //skip = (page - 1)* limit

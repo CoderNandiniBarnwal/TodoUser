@@ -95,3 +95,31 @@ export const updateTodo = async (req, res) => {
     });
   }
 };
+//paginated todo
+export const paginateTodo = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 5; // 5 todo per page
+
+    // Calculating the skip value
+    const skip = (page - 1) * limit;
+
+    // Getting todos with pagination
+    const todos = await todoSchema
+      .find({ userId: req.userId })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      message: "Todos fetched as per query",
+      data: todos,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: "Internal server error",
+    });
+  }
+};
